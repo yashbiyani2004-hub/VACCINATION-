@@ -1,70 +1,44 @@
-# Vaccination Drive Registration Software
+# Vaccination Drive Registration
 
-This web app lets staff register vaccination participants, collect UPI payment proof, let admin confirm payments, issue QR verification, and keep all records in an Excel file.
+A web app to register vaccination participants, collect UPI payment proof, let an admin
+confirm payments, issue QR verification, and export all records to Excel. Built with
+Next.js (App Router) so it deploys to a public Vercel URL.
 
-## Run
+## Screens
 
-```powershell
-npm.cmd install
-npm.cmd start
+- `/` — Registration form with vaccine selection, live UPI QR, reference ID, and screenshot upload
+- `/verify` — Look up a registration by ID and mark confirmed registrations as verified
+- `/admin` — Password-protected dashboard to confirm payments, issue confirmation QR codes, and download Excel
+
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
 
-Optional settings:
+Open http://localhost:3000
 
-```powershell
-$env:ADMIN_PASSWORD="change-this-password"
-$env:PAYMENT_UPI_ID="your-upi-id"
-$env:PAYMENT_PAYEE_NAME="Payee Name"
-npm.cmd start
-```
+## Deploy to a public URL (Vercel)
 
-Open:
+1. Push this repo to GitHub.
+2. Import the repo at https://vercel.com/new.
+3. Deploy — Vercel gives you a permanent public URL like `https://your-app.vercel.app`.
 
-```text
-http://localhost:3000
-```
+## Configuration (optional environment variables)
 
-## What it stores
+Set these in Vercel → Project → Settings → Environment Variables:
 
-- `data/registrations.json`: local registration database
-- `data/payment-screenshots/`: uploaded payment screenshots
-- `data/vaccination_registrations.xlsx`: Excel file updated after registration, admin confirmation, and verification
+- `ADMIN_PASSWORD` — admin dashboard password (default: `ap09cq2770`)
+- `PAYMENT_UPI_ID` — UPI ID for payments (default: `9325339930@sbi`)
+- `PAYMENT_PAYEE_NAME` — payee name shown in the UPI request (default: `Yash Biyani`)
 
-For public deployment, set `DATA_DIR` to a persistent disk or volume path.
+## Important: data persistence
 
-## Main screens
+This version uses an in-memory store, so it has **no external dependencies** and runs
+anywhere. On Vercel's serverless platform, in-memory data is **not durable** — registrations,
+payment screenshots, and the generated Excel can reset on cold starts or redeploys.
 
-- Registration: `http://localhost:3000`
-- Verification: `http://localhost:3000/verify.html`
-- Admin Excel download: `http://localhost:3000/admin.html`
-
-Default admin password is `ap09cq2770`. Change it with `ADMIN_PASSWORD` before using real data.
-
-## Permanent Public URL With Render
-
-Use this if you want a permanent public link such as `https://your-app.onrender.com`.
-
-1. Create a GitHub account or use your existing GitHub account.
-2. Create a new GitHub repository.
-3. Upload this project folder to that repository.
-4. Create a Render account at `https://render.com`.
-5. In Render, choose **New +** then **Blueprint**.
-6. Connect the GitHub repository.
-7. Render will read `render.yaml` and create a web service with a persistent disk.
-8. When Render asks for `ADMIN_PASSWORD`, enter a secure password.
-9. Deploy the service.
-10. After deploy finishes, Render gives you a permanent public URL.
-
-Important: keep the persistent disk enabled. Without it, registrations, payment screenshots, and Excel data can be lost after redeploys.
-
-## Manual Render Settings
-
-If you do not use Blueprint, create a Web Service with:
-
-- Build command: `npm install`
-- Start command: `npm start`
-- Environment variable: `DATA_DIR=/var/data`
-- Environment variable: `ADMIN_PASSWORD=<your-admin-password>`
-- Environment variable: `PAYMENT_UPI_ID=9325339930@sbi`
-- Environment variable: `PAYMENT_PAYEE_NAME=Yash Biyani`
-- Persistent disk mount path: `/var/data`
+For permanent storage, connect a database (Neon Postgres is the recommended default) and
+move the read/write logic in `lib/store.ts` to that database. The rest of the app
+(UI and API routes) stays the same.
